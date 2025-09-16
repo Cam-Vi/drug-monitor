@@ -67,29 +67,28 @@ exports.find = (req, res) => {
 // edits a drug selected using its  ID
 exports.update = (req, res) => {
     if (!req.body) {
-        return res
-            .status(400)
-            .send({ message: "Cannot update an empty drug" })
+        return res.status(400).send({ message: "Cannot update an empty drug" });
     }
 
     const id = req.params.id;
     Drugdb.findByIdAndUpdate(id, req.body, { useFindAndModify: false })
         .then(data => {
             if (!data) {
-                res.status(404).send({ message: `Drug with id: ${id} cannot be updated` })
-            } else {
-                res.send(data);
-                //res.redirect('/');
-                res.redirect('/manage');
-
+                return res.status(404).send({ message: `Drug with id: ${id} cannot be updated` });
             }
+
+            // Chỉ redirect nếu request đến từ form HTML
+            if (req.headers.accept && req.headers.accept.includes('html')) {
+                return res.redirect('/manage'); // cho form HTML
+            }
+
+            // Ngược lại trả JSON (API)
+            res.send(data); // cho request từ JS/AJAX
         })
         .catch(err => {
-            res.status(500).send({ message: "Error in updating drug information" })
-        })
-
-}
-
+            res.status(500).send({ message: "Error in updating drug information" });
+        });
+};
 
 // deletes a drug using its drug ID
 exports.delete = (req, res) => {

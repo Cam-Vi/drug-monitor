@@ -1,38 +1,71 @@
 <!-- add header -->
 <%- include('includes/_header') %>
-<!-- end header -->
-<!-- Main section -->
-<main id="main">
+    <!-- end header -->
+    <!-- Main section -->
+    <main id="main">
 
-	<h2>Calculate Drugs to purchase</h2>
-	<p>For how many days do you want to purchase drugs?</p> <form id="drug_days"> <input type="number" id="days" value="30"> <button type="submit">Enter</button> </form>
+        <h2>Calculate Drugs to purchase</h2>
+        <p>For how many days do you want to purchase drugs?</p>
+        <form id="drug_days">
+            <input type="number" id="days" value="30" min="1">
+            <button type="submit">Enter</button>
+        </form>
 
-	<table id="purchase_table">	
-		<thead>
-			<tr>
-				<th>ID</th>
-				<th>Drug Name</th>
-				<th> Cards to Buy</th>
-				<th>Packs to Buy</th>
-			</tr>
-		</thead>
-		<tbody>
-			<!-- Loop through drugs -->
-			<% for(let i = 0; i < drugs.length; i++) {%>
-			<% let days = 30; %>
-			<% let pills = days*drugs[i].perDay; %>
-			<tr>
-				<td><%= i + 1 %></td>
-				<td><%= drugs[i].name %></td>
-				<td><%= Math.ceil(pills/drugs[i].card) %> (<%= drugs[i].pack/drugs[i].card %> <% if (drugs[i].pack/drugs[i].card < 2) { %> card <%} else { %> cards <% } %> per pack)</td>
-				<td><%= Math.ceil(pills/drugs[i].pack) %></td>
-			</tr>
-			<% } %> <!--  End loop -->
-		</tbody>
-	</table>
-</main>
-<!-- End main section -->
-<!-- add footer -->
-<%- include('includes/_footer') %>
-<!-- end footer-->
+        <table id="purchase_table">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Drug Name</th>
+                    <th>Cards to Buy</th>
+                    <th>Packs to Buy</th>
+                </tr>
+            </thead>
+            <tbody>
+                <!-- Loop through drugs -->
+                <% for(let i = 0; i < drugs.length; i++) { %>
+                    <% let days = 30; %>
+                        <% let pills = days*drugs[i].perDay; %>
+                            <tr data-card="<%= drugs[i].card %>" data-pack="<%= drugs[i].pack %>" data-perday="<%= drugs[i].perDay %>">
+                                <td>
+                                    <%= i + 1 %>
+                                </td>
+                                <td>
+                                    <%= drugs[i].name %>
+                                </td>
+                                <td class="cards">
+                                    <%= Math.ceil(pills/drugs[i].card) %> (
+                                        <%= (drugs[i].pack/drugs[i].card).toFixed(3) %>
+                                            <% if (drugs[i].pack/drugs[i].card < 2) { %> card
+                                                <% } else { %> cards
+                                                    <% } %> per pack)
+                                </td>
+                                <td class="packs">
+                                    <%= Math.ceil(pills/drugs[i].pack) %>
+                                </td>
+                            </tr>
+                            <% } %>
+                                <!-- End loop -->
+            </tbody>
+        </table>
+    </main>
+    <!-- End main section -->
+    <!-- add footer -->
+    <%- include('includes/_footer') %>
+        <!-- end footer -->
 
+        <script>
+            const form = document.getElementById('drug_days');
+            form.addEventListener('submit', function(e) {
+                e.preventDefault();
+                const days = Number(document.getElementById('days').value);
+                document.querySelectorAll('#purchase_table tbody tr').forEach(tr => {
+                    const card = Number(tr.dataset.card);
+                    const pack = Number(tr.dataset.pack);
+                    const perDay = Number(tr.dataset.perday);
+                    const pills = days * perDay;
+
+                    tr.querySelector('.cards').textContent = `${Math.ceil(pills/card)} (${(pack/card).toFixed(3)} ${pack/card < 2 ? 'card' : 'cards'} per pack)`;
+                    tr.querySelector('.packs').textContent = Math.ceil(pills / pack);
+                });
+            });
+        </script>
